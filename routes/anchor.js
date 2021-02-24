@@ -1,17 +1,17 @@
 const Express = require('express');
 const router = Express.Router();
-const UserAnchor = require('../model/UserAnchor');
+const Anchor = require('../model/Anchor');
 const ObjectId = require('mongodb').ObjectID;
 
-router.post('/post-user-anchor', async (req, res) => {
+router.post('/post-anchor', async (req, res) => {
   const data = req.body;
-  const newUserAnchor = new UserAnchor({
-    user_anchor: req.body.user_anchor,
+  const newAnchor = new Anchor({
+    anchor: req.body.anchor,
   });
-  newUserAnchor
+  newAnchor
     .save()
     .then(() => {
-      console.log('user anchor saved succesfully');
+      console.log('anchor saved succesfully');
       res.send({msg: 'sucessfully saved'});
     })
     .catch((err) => {
@@ -19,8 +19,8 @@ router.post('/post-user-anchor', async (req, res) => {
     });
 });
 
-router.get('/get-user-anchor', (req, res) => {
-  UserAnchor.find().then((data) => {
+router.get('/get-anchor', (req, res) => {
+  Anchor.find().then((data) => {
     res.send(data);
   });
 });
@@ -30,11 +30,10 @@ router.delete('/delete', async (req, res) => {
 
   var id = ObjectId(data.id);
   if (data) {
-    UserAnchor.findByIdAndDelete({_id: id}, function (err, response) {
+    Anchor.findByIdAndDelete({_id: id}, function (err, response) {
       if (err) {
         console.log(err);
       } else {
-        console.log(response);
         res.send({msg: 'delete successfully'});
       }
     });
@@ -44,11 +43,13 @@ router.delete('/delete', async (req, res) => {
 router.put('/update', (req, res) => {
   const data = req.body;
   var id = ObjectId(data.id);
-  UserAnchor.findByIdAndUpdate(id, {user_anchor: data.data})
-    .then((response) => res.json({data: response}))
-    .catch((err) =>
-      res.status(400).json({err: 'Unable to update the Database'})
-    );
+  Anchor.findByIdAndUpdate(id, {anchor: data.data}, {new: true})
+    .then((response) => {
+      res.json({data: response});
+    })
+    .catch((err) => {
+      res.status(400).json({err: 'Unable to update the Database'});
+    });
 });
 
 module.exports = router;

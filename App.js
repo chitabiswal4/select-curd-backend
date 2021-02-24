@@ -5,7 +5,7 @@ const cors = require('cors');
 const config = require('./config');
 const {PORT} = config;
 // routes
-const userAnchorRoutes = require('./routes/user-anchor');
+const AnchorRoutes = require('./routes/anchor');
 
 const {MONGO_URI, MONGO_DB_NAME} = config;
 
@@ -23,7 +23,7 @@ mongoose
   .then(() => console.log('MongoDB Connected...'))
   .catch((err) => console.log(err));
 
-app.use('/', userAnchorRoutes);
+app.use('/', AnchorRoutes);
 
 // Serve static assets if in production
 if (process.env.NODE_ENV === 'production') {
