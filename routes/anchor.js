@@ -1,17 +1,21 @@
 const Express = require('express');
 const router = Express.Router();
-const Anchor = require('../model/Anchor');
 const ObjectId = require('mongodb').ObjectID;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
 
 router.post('/post-anchor', async (req, res) => {
+  const c_name = req.body.anchorType;
+  const d = c_name;
+  const Anchor = await getAnchorModel(d);
   const data = req.body;
-  const newAnchor = new Anchor({
+  const anAnchor = new Anchor({
     anchor: req.body.anchor,
   });
-  newAnchor
+  anAnchor
     .save()
     .then(() => {
-      console.log('anchor saved succesfully');
+      console.log('an anchor saved succesfully');
       res.send({msg: 'sucessfully saved'});
     })
     .catch((err) => {
@@ -19,7 +23,10 @@ router.post('/post-anchor', async (req, res) => {
     });
 });
 
-router.get('/get-anchor', (req, res) => {
+router.get('/get-anchor', async (req, res) => {
+  const c_name = JSON.parse(req.query.payload);
+  const d = c_name.anchorType;
+  const Anchor = await getAnchorModel(d);
   Anchor.find().then((data) => {
     res.send(data);
   });
@@ -27,6 +34,9 @@ router.get('/get-anchor', (req, res) => {
 
 router.delete('/delete', async (req, res) => {
   const data = req.body;
+  const c_name = data.anchorType;
+  const d = c_name;
+  const Anchor = await getAnchorModel(d);
 
   var id = ObjectId(data.id);
   if (data) {
@@ -40,8 +50,12 @@ router.delete('/delete', async (req, res) => {
   }
 });
 
-router.put('/update', (req, res) => {
+router.put('/update', async (req, res) => {
   const data = req.body;
+  const c_name = data.anchorType;
+  const d = c_name;
+  const Anchor = await getAnchorModel(d);
+
   var id = ObjectId(data.id);
   Anchor.findByIdAndUpdate(id, {anchor: data.data}, {new: true})
     .then((response) => {
@@ -52,4 +66,20 @@ router.put('/update', (req, res) => {
     });
 });
 
+const Anchors = {};
+function DynamicSchema(collection_name) {
+  var AnAnchorSchema = new Schema({
+    anchor: {type: String},
+  });
+  return mongoose.model(collection_name, AnAnchorSchema);
+}
+
+function getAnchorModel(collection_name) {
+  if (!Anchors[collection_name]) {
+    Anchors[collection_name] = new DynamicSchema(collection_name);
+  }
+  return Anchors[collection_name];
+}
+
 module.exports = router;
+exports.getAnchorModel = getAnchorModel;
